@@ -26,14 +26,18 @@ public class Game extends JFrame implements MouseMotionListener,KeyListener{
 	private Robot r;
 	private SimpleUniverse u;
 	private JFrame frame;
+	private TransformGroup chunkView;
 	private Canvas3D canvas=new Canvas3D(SimpleUniverse.getPreferredConfiguration());
 	private BranchGroup universe;
 	private static BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
 	private static Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(0, 0), "blank cursor");
+	private Chunks chunks;
+	private String saveName;
 	private void setup(){
 		frame=this;
 		super.addWindowListener(new WindowAdapter() {
 	          public void windowClosing(WindowEvent winEvent) {
+	        	  chunks.save();
 	        	  frame.getContentPane().setCursor(Cursor.getDefaultCursor());
 	        	  System.exit(0);
 	          }	
@@ -54,31 +58,26 @@ public class Game extends JFrame implements MouseMotionListener,KeyListener{
 		super.setVisible(true);
 		u.getViewingPlatform().setNominalViewingTransform();
 		mainp=new Player(u);
-		mainp.move(new Point3d(0,2,0));
+		mainp.move(new Point3d(0,0,0));
 		mainp.rotatey(90);
 		frame.getContentPane().setCursor(blankCursor);
 		universe=new BranchGroup();
+		chunkView=new TransformGroup();
+		chunkView.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+		chunkView.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+		chunkView.setCapability(TransformGroup.ALLOW_CHILDREN_WRITE);
+		chunkView.setCapability(TransformGroup.ALLOW_CHILDREN_READ);
+		chunkView.setCapability(TransformGroup.ALLOW_CHILDREN_EXTEND);
+		universe.addChild(chunkView);
 		u.addBranchGraph(universe);
+		chunks=new Chunks(saveName,chunkView);
+		chunks.add((long)mainp.getX()/1000,(long)mainp.getY()/1000,(long)mainp.getZ()/1000, saveName,1);
+		mainp.setView();
 	}
-	Game(){
+	Game(String s){
 		super("Island Domination");
+		saveName=s;
 		setup();
-		BranchGroup chunksrc=new BranchGroup();
-		TransformGroup chunk=new TransformGroup();
-		chunk.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-		chunk.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-		chunksrc.addChild(chunk);
-		//chunks.addChild(chunksrc);
-	}
-	public void addChunk(TransformGroup chunk){
-		BranchGroup b=new BranchGroup();
-		chunk.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-		chunk.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-		b.addChild(chunk);
-		u.addBranchGraph(b);
-	}
-	public void removeChunk(TransformGroup chunk){
-		universe.removeChild(chunk);
 	}
 	@Override
 	public void mouseDragged(MouseEvent e) {
@@ -111,7 +110,7 @@ public class Game extends JFrame implements MouseMotionListener,KeyListener{
 		if(e.getKeyChar()=='z'||e.getKeyChar()=='Z'){
 			mainp.up(-0.1);
 		}
-		
+		chunks.add((long)mainp.getX()/1000,(long)mainp.getY()/1000,(long)mainp.getZ()/1000, saveName,1);
 	}
 	@Override
 	public void keyReleased(KeyEvent e) {

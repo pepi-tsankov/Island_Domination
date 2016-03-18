@@ -44,13 +44,16 @@ public class Player{
 		view.invert();
 		return view;
 	}
+	public void setView(){
+		universe.getViewingPlatform().getViewPlatformTransform().setTransform(this.getView());
+	}
 	public void forward(double speed){
 		Vector3d eyev=Math3d.rotateY(front,anglex);
 		eyev.normalize();
 		player.x+=eyev.x*speed;
 		player.y+=eyev.y*speed;
 		player.z+=eyev.z*speed;
-		universe.getViewingPlatform().getViewPlatformTransform().setTransform(this.getView());
+		setView();
 	}
 	public void right(double speed){
 		Vector3d eyev=Math3d.rotateY(front,anglex-90);
@@ -58,11 +61,11 @@ public class Player{
 		player.x+=eyev.x*speed;
 		player.y+=eyev.y*speed;
 		player.z+=eyev.z*speed;
-		universe.getViewingPlatform().getViewPlatformTransform().setTransform(this.getView());
+		setView();
 	}
 	public void up(double speed){
 		player.y+=speed;
-		universe.getViewingPlatform().getViewPlatformTransform().setTransform(this.getView());
+		setView();
 	}
 	public Point3d getPosition(){
 		return player;
@@ -75,7 +78,7 @@ public class Player{
 		while(anglex<0){
 			anglex+=360;
 		}
-		universe.getViewingPlatform().getViewPlatformTransform().setTransform(this.getView());
+		setView();
 	}
 	public void rotatey(double angle){
 		angley+=angle;
@@ -85,9 +88,19 @@ public class Player{
 		if(angley<-90){
 			angley=-90;
 		}
-		universe.getViewingPlatform().getViewPlatformTransform().setTransform(this.getView());
+		setView();
 	}
 	public void move(Point3d pos){
 		player=pos;
+		setView();
+	}
+	public double getX(){
+		return player.x;
+	}
+	public double getY(){
+		return player.y;
+	}
+	public double getZ(){
+		return player.z;
 	}
 }
